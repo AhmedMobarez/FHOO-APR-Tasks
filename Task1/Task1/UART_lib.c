@@ -11,10 +11,13 @@
 
  void baud_rate(uint16_t baud_val){
 
+ // Value to be calculated that corresponds to required baud rate
+ uint16_t UBRR=0;	
 
- uint16_t UBRR=0;			// Value to be calculated that corresponds to required baud rate
- UBRR = (F_CPU/baud_val)-1;	// Calculate UBRR value for the micro-controller
+ // Calculate UBRR value for the micro-controller
+ UBRR = (F_CPU/baud_val)-1;	
 
+ // Split the value into the higher and lower UBRR bits
  UBRRH = (UBRR >> 8);
  UBRRL = UBRR; 
 
@@ -23,7 +26,7 @@
 
  void uart_init(uint16_t baud_val){
 
- // Enable UART Rx/Tx 
+ // Enable UART reception and transmission
  UCSRB |= (1<<RXEN) | (1<<TXEN);
 
  // Set frame format : 8 data bits, 2 stop bits

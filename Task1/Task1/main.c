@@ -1,48 +1,80 @@
 /*
- * Task1.c
+ * Task1_RX.c
  *
- * Created: 10/3/2019 9:34:04 AM
- * Author : Ahmed
- * Task1 : Communication between two micro-controllers (ATMega 32) using the UART interface 
- * 
+ * Created: 10/9/2019 3:55:46 PM
+ * Author : Ahmed Mobarez
+ *
+ *	This is the Transmitting MCU Code for Task1 in the Applied Programming Course at FHOO
+ *
+ *	The implementation of this code includes reading sensor data through ADC then transmit this data through UART communication to another device
+ *	
+ *
+ * Input : ADC data (ADCH) -- Output : 1.UART Data 
+ *
+ * MCU : ATmega32 , BOARD : myAVR Board MK2 
+ *
+ *Developed on Windows 10 using AtmelStudio 7
  */ 
-
+ #define F_CPU (8000000) //Set clock frequency 
 #include <avr/io.h>
 #include <util/delay.h>
-#include "graphics.h"
-#include "mylcd.h"
-#include "font6x8.h"
-#include "font5x8.h"
 #include "UART_lib.h"
-#define F_CPU (8000000) //Set clock frequency 
+#include "ADC_lib.h"
+#include "timer_lib.h"
+#include <avr/interrupt.h>
+
+uint8_t reading=0;
+
+ISR(ADC_vect){
+	
+	//Toggle pin for testing
+	PORTD ^= (1<<PD5);
+	
+	//Send ADCH through UART
+	uart_write(ADCH);
+
+
+}
+
+ISR(TIMER1_COMPB_vect){
+	//Toggle pin for testing
+	PORTD ^= (1<<PD6); 
+	
+	
+}
+
+
+
+
 
 int main(void)
-{
-	lcd_init();
+{	
+
+	
+	// Initialize ADC Module
+	ADC_init();				
+
+	// initialize UART transfer					
 	uart_init(9600);
-	lcd_clear();
-	lcd_set_cursor(0,0);
-	//lcd_puts(font5x8, "Data from MC1 is ");
-	uint8_t data=0;
 
-	/
+	//Initialize timer 1	
+	timer1_init();						
 
-	data = uart_read();
-	if (data ==7)
-	  lcd_puts(font5x8,"Transmission success");
-	else
-		lcd_puts(font5x8,"Transmission failed");
+	// set pins pd5, pd6 as output for testing
+	DDRD |= (1<<DDD5) | (1<<DDD6);			
+
+	//Start conversion
+	ADCSRA |= (1<<ADSC);
+
+	//Enable Global Interrupt
+	 sei();
+
 
     while (1) 
-    {
-	
-
-	
-//	data = 7;
-	//uart_write(data);
-	
+	{
 
 
-    }
+	}
+
 }
 
