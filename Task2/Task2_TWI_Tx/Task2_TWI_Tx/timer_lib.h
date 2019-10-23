@@ -12,9 +12,8 @@
 #include <avr/io.h>
 
 
-void timer0_init();
-void timer0_cycle(uint8_t duty_cycle);
- void timer1_init();
+
+void timer1_init();
 
 
 

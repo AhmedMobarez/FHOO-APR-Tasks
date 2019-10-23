@@ -17,36 +17,38 @@
 
  ISR(ADC_vect){
    
-   //Toggle pin for testing
-   
-   
-   //Send ADCH through UART
-  // uart_write(ADCH);
+  // Read ADC data
   reading = ADCH;
 
  }
 
  ISR(TWI_vect){
-
+   // Check status if the i2c bus and act accordingly
    switch(TWSR & TW_STATUS_MASK){
-     case TW_ST_SLA_ACK :
-     PORTD ^= (1<<PD5);
-     i2c_write(reading);
-     break;
-
-     case TW_ST_DATA_ACK :
-     PORTD ^= (1<<PD6);
-     i2c_write(reading);
      
+     // Slave address acknowledged, data byte will be transmitted 
+     case TW_ST_SLA_ACK :
+     PORTD ^= (1<<PD5);               //For testing
+     i2c_write(reading);
      break;
-     case TW_ST_DATA_NACK :   //TODO
-     TWCR |= (1<<TWINT) | (1<<TWEA);
+
+     // Data byte acknowledged, sending another data byte
+     case TW_ST_DATA_ACK :
+     PORTD ^= (1<<PD6);               //For testing
+     i2c_write(reading);
      break;
-     case TW_ST_LAST_DATA :   //TODO
+
+     // Data byte received and NACK returned 
+     case TW_ST_DATA_NACK :   
      TWCR |= (1<<TWINT) | (1<<TWEA);
      break;
 
-     default:                 //TODO
+     // Data byte received and Stop signal returned  
+     case TW_ST_LAST_DATA :
+     TWCR |= (1<<TWINT) | (1<<TWEA);
+     break;
+
+     default:  
      break;
 
    }
@@ -56,18 +58,12 @@
 
  }
 
- ISR(TIMER1_COMPB_vect){
-   //Toggle pin for testing
-
-   
- }
-
-
 
 int main(void)
 {
-
+  //I2c Slave address
 	uint8_t ui8_address = 0x21;
+
 	// Initialize ADC Module
 	ADC_init();
 

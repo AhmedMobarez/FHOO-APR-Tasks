@@ -8,25 +8,7 @@
  #include "timer_lib.h"
 
 
- void timer0_init(){
 
-	 // Set wave generation mode to fast PWM, set compare match output mode to non-inverting, No prescaling
-
-	 TCCR0 |= (1<<WGM01) | (1<<WGM00) | (1<<COM01)| (1<<COM00) | (1<<CS00);
-
-
-	 //Set duty cycle and enable pin OCR0 as output
-	 DDRB |= (1<<DDB3);
- 
-
-	 //Set timer interrupt
- }
-
- void timer0_cycle( uint8_t duty_cycle){
-  
-  OCR0 = duty_cycle;
-
- }
 
 
 

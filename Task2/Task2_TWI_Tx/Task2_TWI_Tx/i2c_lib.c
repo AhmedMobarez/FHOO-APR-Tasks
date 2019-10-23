@@ -11,7 +11,6 @@
 
 
 
-
 void i2c_slave_init(uint8_t address){
 
  // Set i2c clock
