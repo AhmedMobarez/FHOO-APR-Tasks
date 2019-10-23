@@ -12,8 +12,7 @@
 #include "avr/io.h"
 void timer0_init();
 void timer0_cycle(uint8_t duty_cycle);
-void WatchDog_on();
-void WatchDog_clear();
+
 
 
 
