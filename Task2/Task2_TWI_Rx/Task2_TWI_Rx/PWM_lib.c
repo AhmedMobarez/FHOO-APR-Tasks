@@ -34,23 +34,5 @@
  }
 
 
- void WatchDog_on ()
- {
-  //Enable watchdog timer
-  WDTCR |= (1<<WDE);
-  
-  //Enable interrupt
-  
-  
-  //Set timeout period to be 2.1s
-  WDTCR |= (1<<WDP0) | (1<<WDP1) | (1<<WDP2);
-  
-  
- }
 
- void WatchDog_clear()
- {
-  
-  MCUCSR &= ~(1<<WDRF);
 
- }
