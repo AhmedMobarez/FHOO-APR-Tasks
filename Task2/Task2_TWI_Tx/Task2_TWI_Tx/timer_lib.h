@@ -14,7 +14,8 @@
 
 
 void timer1_init();
-
+void WatchDog_on();
+void WatchDog_clear();
 
 
 #endif /* PWM_LIB_H_ */
