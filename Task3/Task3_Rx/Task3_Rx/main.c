@@ -48,11 +48,6 @@ volatile uint8_t ui8_scale1 =44;
 //i2c slave address
 volatile uint8_t ui8_address = 0x21;
 
-//communication toggle
-uint8_t toggle=0;
-uint8_t i2c=1;
-uint8_t uart = 0;
-
 
 
 
@@ -61,17 +56,9 @@ void Plot(uint8_t ui8_RX);
 
 
 
-ISR(USART_RXC_vect)
-{
-  wdt_reset();
-  ui8_RX = UDR;
-  Plot(ui8_RX);
-
-  }
-
 
 ISR(TIMER1_COMPB_vect){
-  if(i2c==1){
+  
   // Start i2c transmission
   i2c_start(ui8_address);
 
@@ -92,28 +79,7 @@ ISR(TIMER1_COMPB_vect){
 
   //Toggle LED for testing
   //PORTB ^= (1<<PB4);
-  }
-
-
-  //Communication toggle
-  if(toggle>=0 & toggle <20){
-  PORTB |= (1<<PB6);
-  toggle++;
-  TWCR &= ~(1<<TWEN);
-  i2c = 1;
-  uart=0;
-  }
-  else if (toggle>=20 & toggle <40){
-  toggle++;
-  //PORTB ^= (1<<PB4);
-   PORTB &=~ (1<<PB6);
-   TWCR &= ~(1<<TWEN);
-   uart = 1;
-   i2c=0;
-
-   }
-   else if(toggle>=40)
-   toggle=0;
+  
 
   }
   
@@ -191,9 +157,9 @@ void Plot(uint8_t ui8_RX){
   lcd_puts(font5x8,"v");
 
   //Showing current communication protocol
-  if(i2c==1)
+  
   lcd_puts(font5x8,"--I2C");
-  else if(uart==1)
+  
   lcd_puts(font5x8,"--UART");
 
   // Set curve scale
