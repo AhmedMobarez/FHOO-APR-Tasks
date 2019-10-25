@@ -48,6 +48,11 @@ volatile uint8_t ui8_scale1 =44;
 //i2c slave address
 volatile uint8_t ui8_address = 0x21;
 
+//communication toggle
+uint8_t toggle=0;
+uint8_t i2c=1;
+uint8_t uart = 0;
+
 
 
 
@@ -55,8 +60,16 @@ volatile uint8_t ui8_address = 0x21;
 void Plot(uint8_t ui8_RX);
 
 
-ISR(TIMER1_COMPB_vect){
 
+ISR(USART_RXC_vect)
+{
+  wdt_reset();
+  ui8_RX = UDR;
+  Plot(ui8_RX);
+
+  }
+ISR(TIMER1_COMPB_vect){
+  if(i2c==1){
   // Start i2c transmission
   i2c_start(ui8_address);
 
@@ -77,7 +90,29 @@ ISR(TIMER1_COMPB_vect){
 
   //Toggle LED for testing
   PORTB ^= (1<<PB4);
-}
+  }
+  //Communication toggle
+  if(toggle>=0 & toggle <20){
+  PORTB &= ~(1<<PB6);
+  toggle++;
+  i2c = 1;
+  TWCR |=(1<<TWEN);
+  uart=0;
+  }
+  else if (toggle>=20 & toggle <40){
+  toggle++;
+   PORTB |= (1<<PB6);
+   uart = 1;
+   TWCR &= ~(1<<TWEN)
+   i2c=0;
+
+   }
+   else
+   toggle=0;
+
+  }
+  
+
 
 int main(void)
 {
@@ -111,14 +146,19 @@ int main(void)
   //Initialize I2c
   i2c_master_init();
 
+  //Initialize UART
+  uart_init(9600);
+
   //Set pins for testing
-  DDRB |= (1<<DDB4);
+  DDRB |= (1<<DDB4) | (1<<DDB6);
 
   //Enable WatchDog timer
-  WatchDog_on();
+  //WatchDog_on();
   
   //Enable Global Interrupt
   sei();
+
+
   
   
   while (1)
@@ -143,6 +183,12 @@ void Plot(uint8_t ui8_RX){
   // print the volt value
   lcd_puts(font5x8,c_data_array);
   lcd_puts(font5x8,"v");
+
+  //Showing current communication protocol
+  if(i2c==1)
+  lcd_puts(font5x8,"--I2C");
+  else if(uart==1)
+  lcd_puts(font5x8,"--UART")
 
   // Set curve scale
   ui8_scale = 44 - (ui8_RX*40)/255;

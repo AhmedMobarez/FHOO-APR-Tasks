@@ -19,15 +19,47 @@
  //I2c Slave address
  uint8_t ui8_address = 0x21;
 
-void toggle_protocol(uint8_t protocol);
+ // Status variable of the current communication protocol --> 0:I2c , 1:UART
+ uint8_t protocol =0;
+// Function to toggle communication protocol
+void Push_button();
 
 // Variable to store ADC value
 volatile uint8_t reading=0;
+
+ISR(INT1_vect){
+
+    PORTD ^= (1<<PD6);               //For testing
+    if (PORTD & (1<<PD6))
+    {
+    protocol =1;
+    PORTD |= (1<<PD5);
+
+    }
+
+    else
+    {
+    protocol = 0;
+    PORTD &= ~(1<<PD5);
+
+    }
+
+}
+
+
+
+
+
 
 ISR(ADC_vect){
   
   // Read ADC data
   reading = ADCH;
+
+  if (protocol==1){
+  uart_write(reading);
+
+  }
 
 }
 
@@ -37,14 +69,13 @@ ISR(TWI_vect){
     
     // Slave address acknowledged, data byte will be transmitted
     case TW_ST_SLA_ACK :
-    PORTD ^= (1<<PD5);               //For testing
+    //PORTD ^= (1<<PD5);               //For testing
     wdt_reset();
     i2c_write(reading);
     break;
 
     // Data byte acknowledged, sending another data byte
     case TW_ST_DATA_ACK :
-    PORTD ^= (1<<PD6);               //For testing
     wdt_reset();
     i2c_write(reading);
     break;
@@ -102,6 +133,9 @@ int main(void)
   //Start ADC conversion
   ADCSRA |= (1<<ADSC);
 
+  //push button function
+  Push_button();
+
   //Enable watchdog timer
   WatchDog_on();
 
@@ -114,4 +148,20 @@ int main(void)
   }
 
 }
+
+
+
+void Push_button (){
+
+// Enable external interrupt at PD3 ( INT1 )
+GICR |= (1<<INT1);
+
+// Any logical change will generate an interrupt request
+MCUCR |= (1<<ISC10);
+
+}
+
+
+
+
 
