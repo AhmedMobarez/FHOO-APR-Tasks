@@ -14,8 +14,7 @@
 
 void uart_init(uint16_t baud_val);
 void baud_rate(uint16_t baud_val);
-unsigned char uart_read();
-unsigned char uart_write( unsigned char send);
+void uart_write( unsigned char send);
 
 
 
