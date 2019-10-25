@@ -45,8 +45,6 @@ volatile uint8_t ui8_delbar = DEL_BAR;
 volatile uint8_t ui8_scale =0;
 volatile uint8_t ui8_scale1 =44;
 
-volatile protocol =0; // i2c:0 , uart:1
-
 //i2c slave address
 volatile uint8_t ui8_address = 0x21;
 
@@ -54,16 +52,8 @@ volatile uint8_t ui8_address = 0x21;
 
 
 // Preprocessor for plot function
-void Plot(uint8_t ui8_RX, uint8_t protocol);
+void Plot(uint8_t ui8_RX);
 
-
-ISR(USART_RXC_vect)
-{
-  wdt_reset();														// Reset watchdog timer
-  ui8_RX = UDR;
-  protocol =1;
-  Plot(ui8_RX,protocol);
-  }
 
 ISR(TIMER1_COMPB_vect){
 
@@ -80,7 +70,7 @@ ISR(TIMER1_COMPB_vect){
   wdt_reset();
 
   // Plot the data on the LCD
-  Plot(ui8_RX,protocol);
+  Plot(ui8_RX);
 
   //Send stop signal to end transmission
   i2c_stop();
@@ -112,23 +102,20 @@ int main(void)
   }
 
 
-  // Initialize Timer for PWM output
+  //Initialize Timer for PWM output
   timer0_init();
 
-  // Initialize time 1 for controlling i2c data transmission
+  //initialize time 1 for controlling i2c data transmission
   timer1_init();
   
-  // Initialize I2c
+  //Initialize I2c
   i2c_master_init();
-
-  // Initialize UART
-  uart_init(9600);
 
   //Set pins for testing
   DDRB |= (1<<DDB4);
 
   //Enable WatchDog timer
-  //WatchDog_on();
+  WatchDog_on();
   
   //Enable Global Interrupt
   sei();
@@ -142,7 +129,7 @@ int main(void)
 
 
 
-void Plot(uint8_t ui8_RX, uint8_t protocol){
+void Plot(uint8_t ui8_RX){
 
   // Calculate volts from ADC value
   f_volt = (ui8_RX*5.0)/255;
@@ -156,10 +143,6 @@ void Plot(uint8_t ui8_RX, uint8_t protocol){
   // print the volt value
   lcd_puts(font5x8,c_data_array);
   lcd_puts(font5x8,"v");
-  if(protocol==0)
-  lcd_puts(font5x8,"--i2c");
-  else if(protocol==1)
-  lcd_puts(font5x8,"--uart");
 
   // Set curve scale
   ui8_scale = 44 - (ui8_RX*40)/255;
@@ -191,5 +174,3 @@ void Plot(uint8_t ui8_RX, uint8_t protocol){
 
 
 }
-
-

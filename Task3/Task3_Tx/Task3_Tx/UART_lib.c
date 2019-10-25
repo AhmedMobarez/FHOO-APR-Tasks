@@ -29,9 +29,9 @@
  // Enable UART reception and transmission
  UCSRB |= (1<<RXEN) | (1<<TXEN);
 
- // Set frame format : 8 data bits, 2 stop bits
+ // Set frame format : 8 data bits, 1 stop bits
 
- UCSRC |= (1<<URSEL) | (1<<USBS) | (1<<UCSZ1) | (1<<UCSZ0);
+ UCSRC |= (1<<URSEL) | (1<<UCSZ1) | (1<<UCSZ0);
 
  //Set baud_Rate
  baud_rate(baud_val);

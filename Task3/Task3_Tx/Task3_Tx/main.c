@@ -24,26 +24,12 @@ void toggle_protocol(uint8_t protocol);
 // Variable to store ADC value
 volatile uint8_t reading=0;
 
-// Variable that described used communication protocol --> i2c : 0  , UART : 1
-volatile uint8_t protocol = 0; 
-
 ISR(ADC_vect){
   
   // Read ADC data
   reading = ADCH;
 
-  //Send data through uart
-  
-  uart_write(reading);
-  
-  wdt_reset();
-
-  }
-
-
-
-
-
+}
 
 ISR(TWI_vect){
   // Check status if the i2c bus and act accordingly
@@ -58,6 +44,7 @@ ISR(TWI_vect){
 
     // Data byte acknowledged, sending another data byte
     case TW_ST_DATA_ACK :
+    PORTD ^= (1<<PD6);               //For testing
     wdt_reset();
     i2c_write(reading);
     break;
@@ -81,7 +68,7 @@ ISR(TWI_vect){
   }
 
 
-  
+
 
 }
 
@@ -97,21 +84,17 @@ int main(void)
     WatchDog_clear();
   }
 
- 
+  //I2c Slave address
+  uint8_t ui8_address = 0x21;
 
   // Initialize ADC Module
   ADC_init();
 
-  // Initialize I2C slave Protocol //TODO
-  i2c_slave_init(0);
+  // initialize I2C slave Protocol //TODO
+  i2c_slave_init(ui8_address);
 
   //Initialize timer 1
   timer1_init();
-
-  // Initialize UART
-  uart_init(9600);
-
-
 
   // set pins PD5, PD6 as output for testing
   DDRD |= (1<<DDD5) | (1<<DDD6);
@@ -122,45 +105,13 @@ int main(void)
   //Enable watchdog timer
   WatchDog_on();
 
-  //Setup communication protocol pin
-  DDRB &= ~(1<<DDB6);
-
   //Enable Global Interrupt
   sei();
 
 
   while (1)
   {
-  toggle_protocol(protocol);
-
   }
 
 }
 
-
-void toggle_protocol(uint8_t protocol){
-
-
-//Toggle Communication protocol
-switch(!(PINB & (1<<PB6))){
-  
-  case 1 :
-  TWCR |= (1<<TWIE);
-  ui8_address = 0x21;
-  protocol =0;
-  //PORTD ^= (1<<PD6);
-  _delay_ms(100);
-  break;
-
-  case 0:
-  
-  ui8_address=0;
-  protocol =1;
-  //PORTD ^= (1<<PD6);
-  _delay_ms(100);
-  break;
-  }
-
-
-
-}
