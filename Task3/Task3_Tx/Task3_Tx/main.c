@@ -29,20 +29,25 @@ volatile uint8_t reading=0;
 
 ISR(INT1_vect){
 
-    PORTD ^= (1<<PD6);               //For testing
-    if (PORTD & (1<<PD6))
-    {
+    //PORTD ^= (1<<PD6);               //For testing
+
+    // If LED is on --> Disable I2c
+    //if ( PORTD & (1<<PD6) )
+    
     protocol =1;
-    PORTD |= (1<<PD5);
+    //PORTD |= (1<<PD5);
+    TWCR &= ~(1<<TWEN);
 
-    }
-
-    else
-    {
-    protocol = 0;
-    PORTD &= ~(1<<PD5);
-
-    }
+    //}
+    //
+    //// if LED is off -->Enable I2c
+    //else
+    //{
+    //protocol = 0;
+   //// PORTD &= ~(1<<PD5);
+    //TWCR |= (1<<TWEN);
+    //
+    //}
 
 }
 
@@ -56,7 +61,11 @@ ISR(ADC_vect){
   // Read ADC data
   reading = ADCH;
 
+  
+   
   if (protocol==1){
+  wdt_reset();
+ 
   uart_write(reading);
 
   }
@@ -64,6 +73,7 @@ ISR(ADC_vect){
 }
 
 ISR(TWI_vect){
+  if(protocol==0){
   // Check status if the i2c bus and act accordingly
   switch(TWSR & TW_STATUS_MASK){
     
@@ -99,7 +109,7 @@ ISR(TWI_vect){
   }
 
 
-
+  }
 
 }
 
@@ -114,6 +124,10 @@ int main(void)
     //Clear Watchdog reset pin
     WatchDog_clear();
   }
+
+
+  //UART init
+  uart_init(9600);
 
   //I2c Slave address
   uint8_t ui8_address = 0x21;
@@ -136,6 +150,8 @@ int main(void)
   //push button function
   Push_button();
 
+  
+
   //Enable watchdog timer
   WatchDog_on();
 
@@ -156,8 +172,8 @@ void Push_button (){
 // Enable external interrupt at PD3 ( INT1 )
 GICR |= (1<<INT1);
 
-// Any logical change will generate an interrupt request
-MCUCR |= (1<<ISC10);
+// the falling edge will generate an interrupt request
+MCUCR &= ~((1<<ISC11)| (1<<ISC10));
 
 }
 

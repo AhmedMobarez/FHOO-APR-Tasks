@@ -15,7 +15,7 @@
  uint16_t UBRR=0;
 
  // Calculate UBRR value for the micro-controller
- UBRR = (F_CPU/baud_val)-1;
+ UBRR = (F_CPU/16*baud_val)-1;
 
  // Split the value into the higher and lower UBRR bits
  UBRRH = (UBRR >> 8);

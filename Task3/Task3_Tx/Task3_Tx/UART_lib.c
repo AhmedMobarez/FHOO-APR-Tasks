@@ -15,7 +15,7 @@
  uint16_t UBRR=0;	
 
  // Calculate UBRR value for the micro-controller
- UBRR = (F_CPU/baud_val)-1;	
+ UBRR = (F_CPU/16*baud_val)-1;	
 
  // Split the value into the higher and lower UBRR bits
  UBRRH = (UBRR >> 8);
@@ -31,7 +31,7 @@
 
  // Set frame format : 8 data bits, 1 stop bits
 
- UCSRC |= (1<<URSEL) | (1<<UCSZ1) | (1<<UCSZ0);
+ UCSRC |= (1<<URSEL) | (1<<USBS) | (1<<UCSZ1) | (1<<UCSZ0);
 
  //Set baud_Rate
  baud_rate(baud_val);
@@ -55,10 +55,11 @@
 
  unsigned char uart_write(unsigned char send){
 
-
+ PORTD ^= (1<<PD5);
 //Wait for empty transmit buffer
 while ( !(UCSRA & (1<<UDRE) ) );
 
+PORTD ^= (1<<PD5);
 //Put data into buffer
 UDR = send;
 

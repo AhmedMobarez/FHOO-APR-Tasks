@@ -68,6 +68,8 @@ ISR(USART_RXC_vect)
   Plot(ui8_RX);
 
   }
+
+
 ISR(TIMER1_COMPB_vect){
   if(i2c==1){
   // Start i2c transmission
@@ -89,25 +91,28 @@ ISR(TIMER1_COMPB_vect){
   i2c_stop();
 
   //Toggle LED for testing
-  PORTB ^= (1<<PB4);
+  //PORTB ^= (1<<PB4);
   }
+
+
   //Communication toggle
   if(toggle>=0 & toggle <20){
-  PORTB &= ~(1<<PB6);
+  PORTB |= (1<<PB6);
   toggle++;
+  TWCR &= ~(1<<TWEN);
   i2c = 1;
-  TWCR |=(1<<TWEN);
   uart=0;
   }
   else if (toggle>=20 & toggle <40){
   toggle++;
-   PORTB |= (1<<PB6);
+  //PORTB ^= (1<<PB4);
+   PORTB &=~ (1<<PB6);
+   TWCR &= ~(1<<TWEN);
    uart = 1;
-   TWCR &= ~(1<<TWEN)
    i2c=0;
 
    }
-   else
+   else if(toggle>=40)
    toggle=0;
 
   }
@@ -136,6 +141,8 @@ int main(void)
     lcd_clear();
   }
 
+   //Initialize UART
+   uart_init(9600);
 
   //Initialize Timer for PWM output
   timer0_init();
@@ -146,8 +153,7 @@ int main(void)
   //Initialize I2c
   i2c_master_init();
 
-  //Initialize UART
-  uart_init(9600);
+ 
 
   //Set pins for testing
   DDRB |= (1<<DDB4) | (1<<DDB6);
@@ -188,7 +194,7 @@ void Plot(uint8_t ui8_RX){
   if(i2c==1)
   lcd_puts(font5x8,"--I2C");
   else if(uart==1)
-  lcd_puts(font5x8,"--UART")
+  lcd_puts(font5x8,"--UART");
 
   // Set curve scale
   ui8_scale = 44 - (ui8_RX*40)/255;
