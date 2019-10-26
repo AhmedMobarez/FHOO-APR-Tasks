@@ -47,7 +47,7 @@ void  uart_write(unsigned char send){
 
 
 //Wait for empty transmit buffer
-while ( !(UCSRA & (1<<UDRE) ) );
+//while ( !(UCSRA & (1<<UDRE) ) );
 
 //Put data into buffer
 UDR = send;

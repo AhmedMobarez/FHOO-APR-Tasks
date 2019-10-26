@@ -18,6 +18,7 @@
 #include "PWM_lib.h"
 #include "timer_lib.h"
 #include "UART_lib.h"
+#include <stdbool.h>
 #include <util/delay.h>
 #include <avr/interrupt.h>
 #include <avr/wdt.h>
@@ -49,7 +50,9 @@ volatile uint8_t ui8_scale1 =44;
 volatile uint8_t ui8_address = 0x21;
 
 
-
+//push button variable and communication variable
+uint8_t press=0;
+bool protocol=0;      // I2C:1  , UART:0
 
 // Preprocessor for plot function
 void Plot(uint8_t ui8_RX);
@@ -67,8 +70,8 @@ ISR(USART_RXC_vect){
 }
 
 ISR(TIMER1_COMPB_vect){
-  
- /* // Start i2c transmission
+  if (protocol==1){ 
+  // Start i2c transmission
   i2c_start(ui8_address);
 
   // Red data from I2C
@@ -85,10 +88,36 @@ ISR(TIMER1_COMPB_vect){
 
   //Send stop signal to end transmission
   i2c_stop();
-  */
+  }
   //Toggle LED for testing
   //PORTB ^= (1<<PB4);
+
+  if(press >=0 && press <20){
+  press++;
   
+  }
+
+  else if(press ==20){
+  press= press +5;
+  PORTB ^= (1<<PB6);
+  protocol = !protocol;
+  
+    if(protocol==1){
+    TWCR |= (1<<TWEN);
+    UCSRB &= ~(1<<RXEN);
+    PORTB |= (1<<PB4);
+    }
+    
+
+   else if (protocol==0){
+
+   TWCR &= ~(1<<TWEN);
+   UCSRB |= (1<<RXEN);
+   PORTB &=~ (1<<PB4);
+    }
+  }
+  else 
+    press=0;
 
   }
   
@@ -129,7 +158,7 @@ int main(void)
   uart_init(9600);
   
   //Initialize I2c
-  //i2c_master_init();
+  i2c_master_init();
 
  
 
@@ -137,7 +166,7 @@ int main(void)
   DDRB |= (1<<DDB4) | (1<<DDB6);
 
   //Enable WatchDog timer
-  //WatchDog_on();
+  WatchDog_on();
   
   //Enable Global Interrupt
   sei();
@@ -169,7 +198,10 @@ void Plot(uint8_t ui8_RX){
   lcd_puts(font5x8,"v");
 
   //Showing current communication protocol
-  
+  if (protocol ==1)
+  lcd_puts(font5x8,"  I2C ");
+  else
+  lcd_puts(font5x8,"  UART");
 
 
   // Set curve scale

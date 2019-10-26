@@ -15,22 +15,58 @@
 #include "i2c_lib.h"
 #include "UART_lib.h"
 #include <avr/wdt.h>
+#include <stdbool.h>
 
  //I2c Slave address
  uint8_t ui8_address = 0x21;
 
+ //communication variable
+ bool protocol=0;
 
 // Variable to store ADC value
 volatile uint8_t reading=0;
 
+
+ISR(INT0_vect){
+   
+   
+
+   if(PIND & (1<<PD2))
+   {
+
+   //Disable UART and enable i2c
+   protocol =1;
+  TWCR |= (1<<TWEN);
+   UCSRB &= ~(1<<TXEN);
+   
+   // Testing pins
+   PORTD |= (1<<PD5);
+   PORTD &= ~(1<<PD6);
+   }
+
+   else {
+   //Disable i2c and enable uart
+   
+   protocol=0;
+   TWCR &= ~(1<<TWEN);
+   UCSRB |= (1<<TXEN);
+
+   //Testing pins
+   PORTD |= (1<<PD6);
+   PORTD &= ~(1<<PD5);
+   }
+
+}
 
 
 ISR(ADC_vect){
   
   // Read ADC data
   reading = ADCH;
+  
+  if(protocol==0){
   wdt_reset();
-  uart_write(reading);
+  uart_write(reading);}
 
 }
 
@@ -41,7 +77,6 @@ ISR(TWI_vect){
     
     // Slave address acknowledged, data byte will be transmitted
     case TW_ST_SLA_ACK :
-    //PORTD ^= (1<<PD5);               //For testing
     wdt_reset();
     i2c_write(reading);
     break;
@@ -98,8 +133,8 @@ int main(void)
   ADC_init();
 
   // initialize I2C slave Protocol //TODO
- // i2c_slave_init(ui8_address);
-
+  i2c_slave_init(ui8_address);
+  push_button();
   //Initialize timer 1
   timer1_init();
 
@@ -124,5 +159,16 @@ int main(void)
 
 
 
+void push_button(){
 
+DDRD &= ~(1<<PD2);
+
+// Enable external interrupt at PD3 ( INT1 )
+GICR |= (1<<INT0);
+
+// Any logical change will generate an interrupt request
+MCUCR |= (1<<ISC00);
+
+
+}
 
