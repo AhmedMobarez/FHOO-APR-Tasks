@@ -57,9 +57,18 @@ void Plot(uint8_t ui8_RX);
 
 
 
+ISR(USART_RXC_vect){
+  wdt_reset();														// Reset watchdog timer
+  ui8_RX = UDR;
+  timer0_cycle(ui8_RX);
+  Plot(ui8_RX);
+
+
+}
+
 ISR(TIMER1_COMPB_vect){
   
-  // Start i2c transmission
+ /* // Start i2c transmission
   i2c_start(ui8_address);
 
   // Red data from I2C
@@ -76,7 +85,7 @@ ISR(TIMER1_COMPB_vect){
 
   //Send stop signal to end transmission
   i2c_stop();
-
+  */
   //Toggle LED for testing
   //PORTB ^= (1<<PB4);
   
@@ -115,9 +124,12 @@ int main(void)
 
   //initialize time 1 for controlling i2c data transmission
   timer1_init();
+
+  //Initialize UART
+  uart_init(9600);
   
   //Initialize I2c
-  i2c_master_init();
+  //i2c_master_init();
 
  
 
@@ -158,9 +170,7 @@ void Plot(uint8_t ui8_RX){
 
   //Showing current communication protocol
   
-  lcd_puts(font5x8,"--I2C");
-  
-  lcd_puts(font5x8,"--UART");
+
 
   // Set curve scale
   ui8_scale = 44 - (ui8_RX*40)/255;

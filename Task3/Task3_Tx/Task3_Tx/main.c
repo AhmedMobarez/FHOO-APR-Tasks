@@ -23,22 +23,14 @@
 // Variable to store ADC value
 volatile uint8_t reading=0;
 
-ISR(INT1_vect){
-
-
-
-}
-
-
-
-
 
 
 ISR(ADC_vect){
   
   // Read ADC data
   reading = ADCH;
-
+  wdt_reset();
+  uart_write(reading);
 
 }
 
@@ -106,7 +98,7 @@ int main(void)
   ADC_init();
 
   // initialize I2C slave Protocol //TODO
-  i2c_slave_init(ui8_address);
+ // i2c_slave_init(ui8_address);
 
   //Initialize timer 1
   timer1_init();
