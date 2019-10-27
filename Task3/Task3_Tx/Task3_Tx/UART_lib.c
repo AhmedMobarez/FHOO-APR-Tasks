@@ -33,6 +33,9 @@
 
  UCSRC |= (1<<URSEL) | (1<<USBS) | (1<<UCSZ1) | (1<<UCSZ0);
 
+ //Set Parity bits
+ UCSRC |= (1<<UPM1) | (1<<UPM0);
+
  //Set baud_Rate
  baud_rate(baud_val);
 
@@ -54,4 +57,5 @@ UDR = send;
 
 
  }
+
 

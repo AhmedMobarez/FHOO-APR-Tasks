@@ -31,6 +31,9 @@
 	
 	// Set frame format : 8 data bits, 2 stop bits
 	UCSRC |= (1<<URSEL) | (1<<USBS) | (1<<UCSZ1) | (1<<UCSZ0);
+
+   //Set Parity bits
+   UCSRC |= (1<<UPM1) | (1<<UPM0);
 		
 	//Enable Receive interrupt
 	UCSRB |= (1<<RXCIE);
@@ -53,6 +56,12 @@
  }
 
 
+ void check_parity()
+ {
+
+ if(UCSRC & (1<<PE))
+  UCSRB &= ~(1<<RXEN);
+ }
 
 
 

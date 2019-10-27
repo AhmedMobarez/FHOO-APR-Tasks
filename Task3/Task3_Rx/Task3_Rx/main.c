@@ -78,6 +78,8 @@ protocol=0;
 ISR(USART_RXC_vect){
    
      wdt_reset();														// Reset watchdog timer
+
+    check_parity();
      ui8_RX = UDR;
      timer0_cycle(ui8_RX);
      Plot(ui8_RX);
