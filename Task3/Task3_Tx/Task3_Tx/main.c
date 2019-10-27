@@ -45,7 +45,7 @@ ISR(INT0_vect){
    }
 
    else {
-   //Disable i2c and enable uart
+   //Disable i2c and enable UART
    
    protocol=0;
    TWCR &= ~(1<<TWEN);

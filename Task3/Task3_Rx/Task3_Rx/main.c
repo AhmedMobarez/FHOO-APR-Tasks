@@ -18,6 +18,7 @@
 #include "PWM_lib.h"
 #include "timer_lib.h"
 #include "UART_lib.h"
+#include "EEPROM_lib.h"
 #include <stdbool.h>
 #include <util/delay.h>
 #include <avr/interrupt.h>
@@ -48,6 +49,7 @@ volatile uint8_t ui8_scale1 =44;
 
 //i2c slave address
 volatile uint8_t ui8_address = 0x21;
+volatile uint8_t ui8_eeprom_address = 0x07;
 
 
 //push button variable and communication variable
@@ -57,19 +59,34 @@ bool protocol=0;      // I2C:1  , UART:0
 // Preprocessor for plot function
 void Plot(uint8_t ui8_RX);
 
+void push_button();
+void switch_communication();
+void watchdog_switch();
 
 
+ISR(INT0_vect){
 
-ISR(USART_RXC_vect){
-  wdt_reset();														// Reset watchdog timer
-  ui8_RX = UDR;
-  timer0_cycle(ui8_RX);
-  Plot(ui8_RX);
+if(PIND & (1<<PD2))
+protocol = 1;
 
+else
+protocol=0;
 
 }
 
+
+ISR(USART_RXC_vect){
+   
+     wdt_reset();														// Reset watchdog timer
+     ui8_RX = UDR;
+     timer0_cycle(ui8_RX);
+     Plot(ui8_RX);
+   
+}
+
 ISR(TIMER1_COMPB_vect){
+
+
   if (protocol==1){ 
   // Start i2c transmission
   i2c_start(ui8_address);
@@ -92,32 +109,10 @@ ISR(TIMER1_COMPB_vect){
   //Toggle LED for testing
   //PORTB ^= (1<<PB4);
 
-  if(press >=0 && press <20){
-  press++;
+
+  switch_communication();
   
-  }
 
-  else if(press ==20){
-  press= press +5;
-  PORTB ^= (1<<PB6);
-  protocol = !protocol;
-  
-    if(protocol==1){
-    TWCR |= (1<<TWEN);
-    UCSRB &= ~(1<<RXEN);
-    PORTB |= (1<<PB4);
-    }
-    
-
-   else if (protocol==0){
-
-   TWCR &= ~(1<<TWEN);
-   UCSRB |= (1<<RXEN);
-   PORTB &=~ (1<<PB4);
-    }
-  }
-  else 
-    press=0;
 
   }
   
@@ -126,27 +121,24 @@ ISR(TIMER1_COMPB_vect){
 int main(void)
 {
   
+   if(PIND & (1<<PD2))
+   protocol = 1;
+   else
+   protocol=0;
+
+
   //Initialize LCD
   lcd_init();
   lcd_clear();
   lcd_set_cursor(0,0);
   
-  //Check watchdog timer status
-  if(MCUCSR&(1<<WDRF))
-  {
-    //If condition is true, display error message for 2 seconds
-    lcd_puts(font5x8,"I2C failure-System reset");
-    _delay_ms(2000);
 
-    //Clear Watchdog reset pin
-    WatchDog_clear();
-
-    //Clear LCD from error message
-    lcd_clear();
-  }
 
    //Initialize UART
    uart_init(9600);
+
+   //button press
+   push_button();
 
   //Initialize Timer for PWM output
   timer0_init();
@@ -164,6 +156,27 @@ int main(void)
 
   //Set pins for testing
   DDRB |= (1<<DDB4) | (1<<DDB6);
+
+
+
+    //Check watchdog timer status
+    if(MCUCSR&(1<<WDRF))
+    {
+      //If condition is true, display error message for 2 seconds
+      lcd_puts(font5x8,"System Failure");
+      _delay_ms(2000);
+
+      //Switch communication
+      protocol= EEPROM_read(ui8_eeprom_address);
+      protocol = !protocol;
+      switch_communication();
+
+      //Clear Watchdog reset pin
+      WatchDog_clear();
+
+      //Clear LCD from error message
+      lcd_clear();
+    }
 
   //Enable WatchDog timer
   WatchDog_on();
@@ -234,3 +247,63 @@ void Plot(uint8_t ui8_RX){
 
 
 }
+
+
+void push_button(){
+
+  DDRD &= ~(1<<PD2);
+
+  // Enable external interrupt at PD3 ( INT1 )
+  GICR |= (1<<INT0);
+
+  // Any logical change will generate an interrupt request
+  MCUCR |= (1<<ISC00);
+
+}
+
+
+void switch_communication(){
+
+  if(protocol==1)
+  {
+    TWCR |= (1<<TWEN);
+    UCSRB &= ~((1<<RXEN)| (1<<RXCIE));
+    PORTB |= (1<<PB4);
+    EEPROM_write(ui8_eeprom_address,protocol);
+  }
+  
+  
+  else if (protocol==0)
+  {
+    TWCR &= ~(1<<TWEN);
+    UCSRB |= (1<<RXEN)| (1<<RXCIE);
+    PORTB &=~ (1<<PB4);
+    EEPROM_write(ui8_eeprom_address,protocol);
+  }
+
+}
+
+
+
+void watchdog_switch(){
+
+
+if(protocol==1)
+{
+  //TWCR |= (1<<TWEN);
+  UCSRB &= ~((1<<RXEN)| (1<<RXCIE));
+  PORTB |= (1<<PB4);
+}
+
+
+else if (protocol==0)
+{
+  TWCR &= ~(1<<TWEN);
+  UCSRB |= (1<<RXEN)| (1<<RXCIE);
+  PORTB &=~ (1<<PB4);
+}
+
+
+
+}
+
