@@ -19,7 +19,7 @@ void i2c_slave_init(uint8_t address){
  // No Prescaler
  TWSR &= ~((1<<TWPS0) | (1<<TWPS1));
 
-//Set slave address + R/W bit
+//Set slave address
 TWAR = address;
 
  //Enable interrupt

@@ -3,22 +3,36 @@
  *
  * Created: 11/13/2019 11:32:10 AM
  * Author : Ahmed
+  * Description :
+  *  This is the Receiving MCU Code for Task5 in the Applied Programming Course at FHOO
+  *
+  * Purpose :
+  *  The implementation of this code includes receiving data through SPI communication protocol from a device,
+  *  Using this data to control the brightness of an LEDs via PWM and printing/plotting the data on an LCD.
+  *	A watchdog timer is implemented to reset the system if no data is received after two seconds of waiting
+  *
+  * Input/Output :
+  *  Input  : SPI data (TWDR)
+  *  Output : 1.PWM signal for LED brightness //  2.Printing on LCD the variable and time curve
+  *
+  * MCU : ATmega32 , BOARD : myAVR Board MK2
+  *
+  * Developed on Windows 10 using AtmelStudio 7
  */ 
 
 
 #define F_CPU (8000000) //Set clock frequency
 #define DEL_BAR (6)
 
-#include <avr/io.h>
-#include <stdlib.h>
+
+
 #include "Display/graphics.h"
 #include "Display/mylcd.h"
-#include "Display/font4x8.h"
-#include "Display/font6x8.h"
 #include "Display/font5x8.h"
 #include "SPI_lib.h"
 #include "PWM_lib.h"
 #include "timer_lib.h"
+#include <stdlib.h>
 #include <util/delay.h>
 #include <avr/interrupt.h>
 #include <avr/wdt.h>
@@ -50,26 +64,28 @@ volatile uint8_t ui8_scale1 =44;
 
 
 
-// Preprocessor for plot function
+// Prototype for plot function
 void Plot(uint8_t ui8_RX);
 
 
 ISR(TIMER1_COMPB_vect){
   
+  // Recieve value through SPI
   ui8_RX = spi_receive();
  
+ // Toggling LED for testing
   PORTD ^= (1<<PD6);
+
   // Set PWM output for LED Brightness
   timer0_cycle(ui8_RX);
 
   //Reset Watchdog timer
- wdt_reset();
+  wdt_reset();
 
   // Plot the data on the LCD
   Plot(ui8_RX);
 
-
-  //Toggle LED for testing
+  
   
 }
 
@@ -85,7 +101,7 @@ int main(void)
   if(MCUCSR&(1<<WDRF))
   {
     //If condition is true, display error message for 2 seconds
-    lcd_puts(font5x8,"I2C failure-System reset");
+    lcd_puts(font5x8,"SPI failuret");
     _delay_ms(2000);
 
     //Clear Watchdog reset pin
@@ -99,22 +115,20 @@ int main(void)
   //Initialize Timer for PWM output
   timer0_init();
 
-  //initialize time 1 for controlling i2c data transmission
+  //initialize time 1 for controlling SPI data transmission
   timer1_init();
   
-  //Initialize 
+  //Initialize  SPI
   spi_master_init();
-  SS_Enable;
-  //Set pins for testing
-  //DDRB |= (1<<DDB4);
+  
 
   //Enable WatchDog timer
-  //WatchDog_on();
+  WatchDog_on();
   
   //Enable Global Interrupt
   sei();
 
- 
+ //Set PD6 as output for testing
   DDRD |= (1<<PD6);
   
   while (1)

@@ -19,12 +19,12 @@
   // No timer Pre-scaling
   TCCR0 |= (1<<CS00);
   
-  
   //Enable pin OCR0 as output
   DDRB |= (1<<DDB3);
  }
 
- void timer0_cycle( uint8_t duty_cycle){
+ void timer0_cycle( uint8_t duty_cycle)
+ {
   
   OCR0 = duty_cycle;
 
@@ -32,12 +32,12 @@
 
   
 
- void timer1_init()
+ void timer1_init(float delay)
  {
-	 // set up timer with Pre-scaler = 256 
+	 // Setup CTC Mode
 	 TCCR1B |= (1 << WGM12);
 
-	 //Setup CTC Mode
+	 // Set timer with Pre-scaler = 256 
 	 TCCR1B |= (1 << CS12);
 
 	 //Enable interrupt
@@ -47,7 +47,8 @@
 	 TCNT1 = 0;
 	 
 	 // initialize compare value --> Required delay of 500ms at frequecy of F_CPU/256
-	 OCR1A = 15624;
+   // Equation provided by ATmega32 data sheet to calculate timer count given required delay
+   OCR1A = ((delay*F_CPU)/256)-1;
 
 
  }

@@ -3,17 +3,34 @@
  *
  * Created: 10/24/2019 9:57:24 AM
  * Author : Ahmed
+ * Description :
+ *  This is the Transmitting MCU Code for Task3 in the Applied Programming Course at FHOO
+ *
+ * Purpose :
+ *  The implementation of this code includes reading sensor data through ADC then the transmission of this data through I2C/TWI or UART communication protocol
+ *  to another device.
+ *  The user can change the communication protocol from I2C/TWI to UART at will using a push button on the receiver side which triggers
+ *  an external interrupt on this side ( transmitter side) to implement that change
+ *
+ *
+ * Input/Output :
+ *  ADC data (ADCH) -- Output : TWI Data/ UART Data
+ *
+ * MCU : ATmega32 , BOARD : myAVR Board MK2
+ *
+ *  Developed on Windows 10 using AtmelStudio 7
  */ 
 
+#define I2C 1           // I2C communication protocol is represented as a High value
+#define UART 0          // UART communication protocol is represented as a Low value
 
-#define F_CPU (8000000) //Set clock frequency
-#include <avr/io.h>
-#include <util/delay.h>
+
+#include "UART_lib.h"
 #include "ADC_lib.h"
 #include "timer_lib.h"
-#include <avr/interrupt.h>
 #include "i2c_lib.h"
-#include "UART_lib.h"
+#include <avr/interrupt.h>
+#include <util/delay.h>
 #include <avr/wdt.h>
 #include <stdbool.h>
 
@@ -26,17 +43,18 @@
 // Variable to store ADC value
 volatile uint8_t reading=0;
 
+//Function prototype
+void push_button();
+
 
 ISR(INT0_vect){
    
-   
-
    if(PIND & (1<<PD2))
    {
 
    //Disable UART and enable i2c
-   protocol =1;
-  TWCR |= (1<<TWEN);
+   protocol =I2C;
+   TWCR |= (1<<TWEN);
    UCSRB &= ~(1<<TXEN);
    
    // Testing pins
@@ -47,7 +65,7 @@ ISR(INT0_vect){
    else {
    //Disable i2c and enable UART
    
-   protocol=0;
+   protocol=UART;
    TWCR &= ~(1<<TWEN);
    UCSRB |= (1<<TXEN);
 
@@ -64,7 +82,7 @@ ISR(ADC_vect){
   // Read ADC data
   reading = ADCH;
   
-  if(protocol==0){
+  if(protocol==UART){
   wdt_reset();
   uart_write(reading);}
 
@@ -105,9 +123,6 @@ ISR(TWI_vect){
 
   }
 
-
-  
-
 }
 
 
@@ -132,9 +147,12 @@ int main(void)
   // Initialize ADC Module
   ADC_init();
 
-  // initialize I2C slave Protocol //TODO
+  // initialize I2C slave Protocol
   i2c_slave_init(ui8_address);
+
+  //Push button function init
   push_button();
+
   //Initialize timer 1
   timer1_init();
 
@@ -161,13 +179,14 @@ int main(void)
 
 void push_button(){
 
-DDRD &= ~(1<<PD2);
-
-// Enable external interrupt at PD3 ( INT1 )
-GICR |= (1<<INT0);
-
-// Any logical change will generate an interrupt request
-MCUCR |= (1<<ISC00);
+  // SET PD2 as input
+  DDRD &= ~(1<<PD2);
+  
+  // Enable external interrupt at PD2 ( INT0 )
+  GICR |= (1<<INT0);
+  
+  // Any logical change will generate an interrupt request
+  MCUCR |= (1<<ISC00);
 
 
 }

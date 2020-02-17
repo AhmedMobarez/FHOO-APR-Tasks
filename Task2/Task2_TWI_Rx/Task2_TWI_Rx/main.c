@@ -3,21 +3,34 @@
  *
  * Created: 10/15/2019 3:05:25 PM
  * Author : Ahmed
+ *Description :
+ *  This is the Receiving MCU Code for Task2 in the Applied Programming Course at FHOO
+ *
+ *Purpose :
+ *  The implementation of this code includes receiving data through TWI/I2c communication protocol from another device, Using this data to control brightness of LED via PWM and printing the data on an LCD.
+ *	A watchdog timer is implemented to reset the system if no data is received after two seconds of waiting
+ *
+ *Input/Output :
+ *  UART data (UDR)
+ *  Output : 1.PWM for LED brightness //  2.Printing on LCD the variable and time curve
+ *
+ * MCU : ATmega32 , BOARD : myAVR Board MK2
+ *
+ *Developed on Windows 10 using AtmelStudio 7.0.2389
  */ 
 
-#define F_CPU (8000000) //Set clock frequency
+#define F_CPU (8000000) //Set clock frequency in Hz
 #define DEL_BAR (6)
 
-#include <avr/io.h>
-#include <stdlib.h>
+
+
 #include "Display/graphics.h"
 #include "Display/mylcd.h"
-#include "Display/font4x8.h"
-#include "Display/font6x8.h"
 #include "Display/font5x8.h"
 #include "i2c_lib.h"
 #include "PWM_lib.h"
 #include "timer_lib.h"
+#include <stdlib.h>
 #include <util/delay.h>
 #include <avr/interrupt.h>
 #include <avr/wdt.h>
@@ -55,12 +68,13 @@ volatile uint8_t ui8_address = 0x21;
 void Plot(uint8_t ui8_RX);
 
 
-ISR(TIMER1_COMPB_vect){
+ISR(TIMER1_COMPB_vect)
+{
 
   // Start i2c transmission
   i2c_start(ui8_address);
 
-  // Red data from I2C
+  // Read data from I2C
   ui8_RX = i2c_readack();
 
   // Set PWM output for LED Brightness
@@ -105,8 +119,8 @@ int main(void)
   //Initialize Timer for PWM output
   timer0_init();
 
-  //initialize time 1 for controlling i2c data transmission
-  timer1_init();
+  //initialize time 1 -- Pass required time interval in seconds
+  timer1_init(0.5);
   
   //Initialize I2c
   i2c_master_init();  
@@ -129,7 +143,8 @@ int main(void)
 
 
 
-void Plot(uint8_t ui8_RX){
+void Plot(uint8_t ui8_RX)
+{
 
   // Calculate volts from ADC value
   f_volt = (ui8_RX*5.0)/255;
@@ -163,12 +178,14 @@ void Plot(uint8_t ui8_RX){
 
 
   // if time-axis reaches the end of LCD (128) --> reset time axis
-  if(ui8_time>125){
+  if(ui8_time>125)
+  {
     ui8_time =0;
     ui8_time1=0;
   }
 
-  if(ui8_delbar>125){
+  if(ui8_delbar>125)
+  {
     ui8_delbar=0;
   }
 

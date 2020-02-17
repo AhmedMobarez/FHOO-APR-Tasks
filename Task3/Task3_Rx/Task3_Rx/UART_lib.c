@@ -15,7 +15,7 @@
  uint16_t UBRR=0;
 
  // Calculate UBRR value for the micro-controller
- UBRR = (F_CPU/baud_val)-1;
+ UBRR = (F_CPU/(16*baud_val))-1;
 
  // Split the value into the higher and lower UBRR bits
  UBRRH = (UBRR >> 8);
@@ -27,7 +27,7 @@
  void uart_init(uint16_t baud_val){
 
 	// Enable UART reception and transmission
-	UCSRB |= (1<<RXEN) | (1<<TXEN);
+	UCSRB |= (1<<RXEN);
 	
 	// Set frame format : 8 data bits, 2 stop bits
 	UCSRC |= (1<<URSEL) | (1<<USBS) | (1<<UCSZ1) | (1<<UCSZ0);

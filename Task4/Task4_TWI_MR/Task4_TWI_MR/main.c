@@ -3,21 +3,33 @@
  *
  * Created: 11/2/2019 7:49:11 PM
  * Author : Ahmed
+ * Description :
+ *  This is the Receiving MCU Code for Task4 in the Applied Programming Course at FHOO
+ *
+ * Purpose :
+ *  The implementation of this code includes receiving data through TWI/I2c communication protocol from two devices/slaves,
+ *  Using this data to control the brightness of two LEDs via PWM and printing/plotting the data on an LCD.
+ *	A watchdog timer is implemented to reset the system if no data is received after two seconds of waiting
+ *
+ * Input/Output :
+ *  Input  : TWI data (TWDR)
+ *  Output : 1.Two PWM signals for LED brightness //  2.Printing on LCD the variables and time curves
+ *
+ * MCU : ATmega32 , BOARD : myAVR Board MK2
+ *
+ * Developed on Windows 10 using AtmelStudio 7
  */ 
 
 #define F_CPU (8000000) //Set clock frequency
 #define DEL_BAR (6)
 
-#include <avr/io.h>
-#include <stdlib.h>
 #include "Display/graphics.h"
 #include "Display/mylcd.h"
-#include "Display/font4x8.h"
-#include "Display/font6x8.h"
 #include "Display/font5x8.h"
 #include "i2c_lib.h"
 #include "PWM_lib.h"
 #include "timer_lib.h"
+#include <stdlib.h>
 #include <util/delay.h>
 #include <avr/interrupt.h>
 #include <avr/wdt.h>
@@ -49,8 +61,10 @@ volatile uint8_t ui8_volt_old2 =44;
 volatile uint8_t ui8_delbar = DEL_BAR;
 volatile uint8_t ui8_delbar2 = DEL_BAR + 64;
 
-// Variables to hold current and data points
+// Variables to hold current and old data points
 volatile uint8_t ui8_scale =0;
+volatile uint8_t ui8_scale2 =0;
+
 	
 
 //i2c slave address
@@ -59,20 +73,22 @@ volatile unsigned char ui8_address2 = 0x08;
 
 
 
-// Preprocessor for plot function
+// plot function prototype
 void double_plot(uint8_t ui8_RX, uint8_t ui8_RX2);
 
+// i2c dataframe function prototype
 uint8_t i2c_dataframe(unsigned char address);
 
 ISR(TIMER1_COMPB_vect){
 
-  //Get data values from slave
+  //Get data values from slaves
   ui8_RX = i2c_dataframe(ui8_address);
   ui8_RX2 = i2c_dataframe(ui8_address2);
 
   // Set PWM output for LED Brightness
   timer0_cycle(ui8_RX);
   timer2_cycle(ui8_RX2);
+
   //Reset Watchdog timer
   wdt_reset();
 
@@ -96,7 +112,7 @@ int main(void)
   if(MCUCSR&(1<<WDRF))
   {
     //If condition is true, display error message for 2 seconds
-    lcd_puts(font5x8,"I2C failure-System reset");
+    lcd_puts(font5x8,"I2C failure");
     _delay_ms(2000);
 
     //Clear Watchdog reset pin
@@ -111,8 +127,8 @@ int main(void)
   timer0_init();
   timer2_init();
 
-  //initialize time 1 for controlling i2c data transmission
-  timer1_init();
+  //initialize time 1 for controlling i2c data transmission with 500ms intervals
+  timer1_init(0.5);
   
   //Initialize I2c
   i2c_master_init();  
@@ -142,9 +158,11 @@ void double_plot(uint8_t ui8_RX,uint8_t ui8_RX2){
 
   // Draw a vertical line to separate both curves
   g_VLine(63,2,64,1);
-  // Convert the value into a string for printing
+
+  // Convert the values into a string for printing
   dtostrf(f_volt,3,2,c_data_array);	
   dtostrf(f_volt2,3,2,c_data_array2);	
+
   // Set cursor location for printing	first value			
   lcd_set_cursor(0,55);
 
@@ -152,30 +170,30 @@ void double_plot(uint8_t ui8_RX,uint8_t ui8_RX2){
   lcd_puts(font5x8,c_data_array);									
   lcd_puts(font5x8,"v");
 
-  //Set Cursor location for printing the second valhe
+  //Set Cursor location for printing the second value
   lcd_set_cursor(66,55);
 
   // Print the second volt value
   lcd_puts(font5x8,c_data_array2);
   lcd_puts(font5x8,"v");
 
-  // Set curve scale
-  f_volt = 44 - (uint8_t)f_volt*8;
-  f_volt2 = 44 - (uint8_t)f_volt2*8;
+  // Set curve scale ( plot range in Y-axis is 4-40)
+  ui8_scale = 44 - (ui8_RX*40)/255;    
+  ui8_scale2 = 44 - (ui8_RX2*40)/255;
 
   // Plot first graph using interpolation function
-  g_Interp1(ui8_time_old,ui8_volt_old,ui8_time,f_volt,1);
+  g_Interp1(ui8_time_old,ui8_volt_old,ui8_time,ui8_scale,1);
   
   // Plot second graph using interpolation function
-  g_Interp1(ui8_time_old2,ui8_volt_old2,ui8_time2,f_volt2,1);
+  g_Interp1(ui8_time_old2,ui8_volt_old2,ui8_time2,ui8_scale2,1);
 
-  // Create two delete bar to update the curves
+  // Create two delete bars to update the curves
   g_VLine(ui8_delbar,0,50,0);
   g_VLine(ui8_delbar2,0,50,0);
 
   // Save Current data & time points
-  ui8_volt_old = f_volt;
-  ui8_volt_old2 = f_volt2;
+  ui8_volt_old = ui8_scale;
+  ui8_volt_old2 = ui8_scale2;
 
   ui8_time_old = ui8_time;
   ui8_time_old2 = ui8_time2;
@@ -188,23 +206,24 @@ void double_plot(uint8_t ui8_RX,uint8_t ui8_RX2){
 
 
   // if time-axis reaches the end of LCD (128) --> reset time axis
-  if(ui8_time>62){
+  if(ui8_time>=62){
     ui8_time =0;
-    ui8_time2= ui8_time + 62;
+    ui8_time2= ui8_time + 64;
     ui8_time_old=0;
-    ui8_time_old2=ui8_time_old + 62;
+    ui8_time_old2=ui8_time_old + 64;
 
   }
 
-  if(ui8_delbar>62){
+  if(ui8_delbar>=63){
     ui8_delbar=0;
-    ui8_delbar2 = ui8_delbar + 62;
+    ui8_delbar2 = ui8_delbar + 65;
   }
 
 
 }
 
 
+// Implementation of one full I2C dataframe ( get one byte through I2C )
 uint8_t i2c_dataframe(unsigned char address)
 {
   uint8_t data=0;

@@ -11,26 +11,36 @@
 
 
 
- unsigned char spi_transmit(unsigned char data){
+ void spi_transmit(unsigned char data){
+  //Write data to SPI data register
+  SPDR = data;
 
-  	SPDR = data;								/* Write data to SPI data register */
-  	while(!(SPSR & (1<<SPIF)));					/* Wait till transmission complete */
-  	return(SPDR);
+  
+  while(!(SPSR & (1<<SPIF)));	
+
+
  }
 
 
 
- char SPI_Receive()								/* SPI Receive data function */
- {
-   while(!(SPSR & (1<<SPIF)));					/* Wait till reception complete */
-   return(SPDR);								/* return received data */
+ unsigned char SPI_Receive()								
+ {  
+  //Wait till transmission complete
+  while(!(SPSR & (1<<SPIF)));
+
+  //Return Data
+  return(SPDR);	
  }
 
 
 
  void spi_slave_init(){
- 
-DDRB &= ~((1<<MOSI)|(1<<SCK)|(1<<SS));		/* Make MOSI, SCK, SS pin direction as input pins */
-DDRB |= (1<<MISO);							/* Make MISO pin as output pin */
-SPCR = (1<<SPE) | (1<<SPIE);
+  // Make MOSI, SCK, SS pin direction as input pins 
+  DDRB &= ~((1<<MOSI)|(1<<SCK)|(1<<SS));
+
+  //make MISO pin as output pin 
+  DDRB |= (1<<MISO);
+
+  //Enable SPI & SPI interrupt
+  SPCR = (1<<SPE) | (1<<SPIE);
  }

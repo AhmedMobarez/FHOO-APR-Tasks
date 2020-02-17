@@ -10,7 +10,6 @@
  void ADC_init(){
 
  //Set reference voltage to be VCC
-
  ADMUX |=(1<<REFS0);
 
  //Choose PA1 as our analog input pin (ADC1)
@@ -43,12 +42,6 @@
 
  //Start conversion
 ADCSRA |= (1<<ADSC);
-
- //wait for the conversion to be completed
- //while(ADCSRA & (1<<ADSC));
-
- // Return received value
- //return ADCH;
 
 
  }

@@ -1,0 +1,330 @@
+
+Task5_SPI_Tx.elf:     file format elf32-avr
+
+Sections:
+Idx Name          Size      VMA       LMA       File off  Algn
+  0 .text         00000146  00000000  00000000  00000074  2**1
+                  CONTENTS, ALLOC, LOAD, READONLY, CODE
+  1 .data         00000000  00800060  00800060  000001ba  2**0
+                  CONTENTS, ALLOC, LOAD, DATA
+  2 .bss          00000001  00800060  00800060  000001ba  2**0
+                  ALLOC
+  3 .comment      00000060  00000000  00000000  000001ba  2**0
+                  CONTENTS, READONLY
+  4 .note.gnu.avr.deviceinfo 0000003c  00000000  00000000  0000021c  2**2
+                  CONTENTS, READONLY
+  5 .debug_aranges 000000b8  00000000  00000000  00000258  2**0
+                  CONTENTS, READONLY, DEBUGGING
+  6 .debug_info   00000835  00000000  00000000  00000310  2**0
+                  CONTENTS, READONLY, DEBUGGING
+  7 .debug_abbrev 00000676  00000000  00000000  00000b45  2**0
+                  CONTENTS, READONLY, DEBUGGING
+  8 .debug_line   0000051d  00000000  00000000  000011bb  2**0
+                  CONTENTS, READONLY, DEBUGGING
+  9 .debug_frame  00000124  00000000  00000000  000016d8  2**2
+                  CONTENTS, READONLY, DEBUGGING
+ 10 .debug_str    000003b8  00000000  00000000  000017fc  2**0
+                  CONTENTS, READONLY, DEBUGGING
+ 11 .debug_loc    00000085  00000000  00000000  00001bb4  2**0
+                  CONTENTS, READONLY, DEBUGGING
+ 12 .debug_ranges 00000078  00000000  00000000  00001c39  2**0
+                  CONTENTS, READONLY, DEBUGGING
+
+Disassembly of section .text:
+
+00000000 <__vectors>:
+   0:	0c 94 2a 00 	jmp	0x54	; 0x54 <__ctors_end>
+   4:	0c 94 3c 00 	jmp	0x78	; 0x78 <__bad_interrupt>
+   8:	0c 94 3c 00 	jmp	0x78	; 0x78 <__bad_interrupt>
+   c:	0c 94 3c 00 	jmp	0x78	; 0x78 <__bad_interrupt>
+  10:	0c 94 3c 00 	jmp	0x78	; 0x78 <__bad_interrupt>
+  14:	0c 94 3c 00 	jmp	0x78	; 0x78 <__bad_interrupt>
+  18:	0c 94 3c 00 	jmp	0x78	; 0x78 <__bad_interrupt>
+  1c:	0c 94 3c 00 	jmp	0x78	; 0x78 <__bad_interrupt>
+  20:	0c 94 3c 00 	jmp	0x78	; 0x78 <__bad_interrupt>
+  24:	0c 94 3c 00 	jmp	0x78	; 0x78 <__bad_interrupt>
+  28:	0c 94 3c 00 	jmp	0x78	; 0x78 <__bad_interrupt>
+  2c:	0c 94 3c 00 	jmp	0x78	; 0x78 <__bad_interrupt>
+  30:	0c 94 5a 00 	jmp	0xb4	; 0xb4 <__vector_12>
+  34:	0c 94 3c 00 	jmp	0x78	; 0x78 <__bad_interrupt>
+  38:	0c 94 3c 00 	jmp	0x78	; 0x78 <__bad_interrupt>
+  3c:	0c 94 3c 00 	jmp	0x78	; 0x78 <__bad_interrupt>
+  40:	0c 94 4b 00 	jmp	0x96	; 0x96 <__vector_16>
+  44:	0c 94 3c 00 	jmp	0x78	; 0x78 <__bad_interrupt>
+  48:	0c 94 3c 00 	jmp	0x78	; 0x78 <__bad_interrupt>
+  4c:	0c 94 3c 00 	jmp	0x78	; 0x78 <__bad_interrupt>
+  50:	0c 94 3c 00 	jmp	0x78	; 0x78 <__bad_interrupt>
+
+00000054 <__ctors_end>:
+  54:	11 24       	eor	r1, r1
+  56:	1f be       	out	0x3f, r1	; 63
+  58:	cf e5       	ldi	r28, 0x5F	; 95
+  5a:	d8 e0       	ldi	r29, 0x08	; 8
+  5c:	de bf       	out	0x3e, r29	; 62
+  5e:	cd bf       	out	0x3d, r28	; 61
+
+00000060 <__do_clear_bss>:
+  60:	20 e0       	ldi	r18, 0x00	; 0
+  62:	a0 e6       	ldi	r26, 0x60	; 96
+  64:	b0 e0       	ldi	r27, 0x00	; 0
+  66:	01 c0       	rjmp	.+2      	; 0x6a <.do_clear_bss_start>
+
+00000068 <.do_clear_bss_loop>:
+  68:	1d 92       	st	X+, r1
+
+0000006a <.do_clear_bss_start>:
+  6a:	a1 36       	cpi	r26, 0x61	; 97
+  6c:	b2 07       	cpc	r27, r18
+  6e:	e1 f7       	brne	.-8      	; 0x68 <.do_clear_bss_loop>
+  70:	0e 94 6f 00 	call	0xde	; 0xde <main>
+  74:	0c 94 a1 00 	jmp	0x142	; 0x142 <_exit>
+
+00000078 <__bad_interrupt>:
+  78:	0c 94 00 00 	jmp	0	; 0x0 <__vectors>
+
+0000007c <ADC_init>:
+ #include "ADC_lib.h"
+
+ void ADC_init(){
+
+ //Set reference voltage to be VCC
+ ADMUX |=(1<<REFS0);
+  7c:	3e 9a       	sbi	0x07, 6	; 7
+
+ //Choose PA1 as our analog input pin (ADC1)
+ ADMUX |=(1<<MUX0);
+  7e:	38 9a       	sbi	0x07, 0	; 7
+
+ //Left adjust ADC data for easier 8 bit reading
+ ADMUX |=(1<<ADLAR) ;
+  80:	3d 9a       	sbi	0x07, 5	; 7
+
+
+  //Enable ADC
+  ADCSRA |= (1<<ADEN);
+  82:	37 9a       	sbi	0x06, 7	; 6
+  
+  //Set Pre-scaler value to 128 ( frequency = F_CPU/128 = 62.5KHz )
+  ADCSRA |=(1<<ADPS0)|(1<<ADPS1)|(1<<ADPS2);
+  84:	86 b1       	in	r24, 0x06	; 6
+  86:	87 60       	ori	r24, 0x07	; 7
+  88:	86 b9       	out	0x06, r24	; 6
+  
+  //Enable ADC Interrupt
+  ADCSRA |= (1<<ADIE);
+  8a:	33 9a       	sbi	0x06, 3	; 6
+  
+  //Enable ADC auto-triggering
+  ADCSRA |= (1<<ADATE);
+  8c:	35 9a       	sbi	0x06, 5	; 6
+  
+  //Auto Triggering mode -> Timer/Counter 1 Compart Match B 
+  SFIOR |= (1<<ADTS2) | (1<<ADTS0);
+  8e:	80 b7       	in	r24, 0x30	; 48
+  90:	80 6a       	ori	r24, 0xA0	; 160
+  92:	80 bf       	out	0x30, r24	; 48
+  94:	08 95       	ret
+
+00000096 <__vector_16>:
+ #include <avr/wdt.h>
+
+ // Variable to store ADC Value
+ volatile uint8_t reading=0;
+
+ ISR(ADC_vect){
+  96:	1f 92       	push	r1
+  98:	0f 92       	push	r0
+  9a:	0f b6       	in	r0, 0x3f	; 63
+  9c:	0f 92       	push	r0
+  9e:	11 24       	eor	r1, r1
+  a0:	8f 93       	push	r24
+   
+   // Read ADC data
+   reading = ADCH;
+  a2:	85 b1       	in	r24, 0x05	; 5
+  a4:	80 93 60 00 	sts	0x0060, r24	; 0x800060 <__DATA_REGION_ORIGIN__>
+   
+ }
+  a8:	8f 91       	pop	r24
+  aa:	0f 90       	pop	r0
+  ac:	0f be       	out	0x3f, r0	; 63
+  ae:	0f 90       	pop	r0
+  b0:	1f 90       	pop	r1
+  b2:	18 95       	reti
+
+000000b4 <__vector_12>:
+
+
+ ISR(SPI_STC_vect){
+  b4:	1f 92       	push	r1
+  b6:	0f 92       	push	r0
+  b8:	0f b6       	in	r0, 0x3f	; 63
+  ba:	0f 92       	push	r0
+  bc:	11 24       	eor	r1, r1
+  be:	8f 93       	push	r24
+  c0:	9f 93       	push	r25
+
+ // Send ADC Value through SPI Data register
+ SPDR = reading;
+  c2:	80 91 60 00 	lds	r24, 0x0060	; 0x800060 <__DATA_REGION_ORIGIN__>
+  c6:	8f b9       	out	0x0f, r24	; 15
+
+ //Toggle LED for testing
+ PORTD ^= (1<<PD6);
+  c8:	92 b3       	in	r25, 0x12	; 18
+  ca:	80 e4       	ldi	r24, 0x40	; 64
+  cc:	89 27       	eor	r24, r25
+  ce:	82 bb       	out	0x12, r24	; 18
+  
+  
+
+ }
+  d0:	9f 91       	pop	r25
+  d2:	8f 91       	pop	r24
+  d4:	0f 90       	pop	r0
+  d6:	0f be       	out	0x3f, r0	; 63
+  d8:	0f 90       	pop	r0
+  da:	1f 90       	pop	r1
+  dc:	18 95       	reti
+
+000000de <main>:
+ int main(void)
+ {
+
+
+   //Check watchdog timer status
+   if(MCUCSR&(1<<WDRF))
+  de:	04 b6       	in	r0, 0x34	; 52
+  e0:	03 fc       	sbrc	r0, 3
+   {
+     //Clear Watchdog reset pin
+     WatchDog_clear();
+  e2:	0e 94 9d 00 	call	0x13a	; 0x13a <WatchDog_clear>
+   }
+
+
+
+   // Initialize ADC Module
+   ADC_init();
+  e6:	0e 94 3e 00 	call	0x7c	; 0x7c <ADC_init>
+
+   // initialize SPI
+   spi_slave_init();
+  ea:	0e 94 7f 00 	call	0xfe	; 0xfe <spi_slave_init>
+
+   //Initialize timer 1
+   timer1_init();
+  ee:	0e 94 86 00 	call	0x10c	; 0x10c <timer1_init>
+
+
+
+   //Start ADC conversion
+   ADCSRA |= (1<<ADSC);
+  f2:	36 9a       	sbi	0x06, 6	; 6
+
+   //Enable watchdog timer
+   WatchDog_on();
+  f4:	0e 94 96 00 	call	0x12c	; 0x12c <WatchDog_on>
+
+   //Enable Global Interrupt
+   sei();
+  f8:	78 94       	sei
+
+   //Set PD6 as output for testing
+   DDRD |= (1<<PD6);
+  fa:	8e 9a       	sbi	0x11, 6	; 17
+  fc:	ff cf       	rjmp	.-2      	; 0xfc <main+0x1e>
+
+000000fe <spi_slave_init>:
+
+
+
+ void spi_slave_init(){
+  // Make MOSI, SCK, SS pin direction as input pins 
+  DDRB &= ~((1<<MOSI)|(1<<SCK)|(1<<SS));
+  fe:	87 b3       	in	r24, 0x17	; 23
+ 100:	8f 74       	andi	r24, 0x4F	; 79
+ 102:	87 bb       	out	0x17, r24	; 23
+
+  //make MISO pin as output pin 
+  DDRB |= (1<<MISO);
+ 104:	be 9a       	sbi	0x17, 6	; 23
+
+  //Enable SPI & SPI interrupt
+  SPCR = (1<<SPE) | (1<<SPIE);
+ 106:	80 ec       	ldi	r24, 0xC0	; 192
+ 108:	8d b9       	out	0x0d, r24	; 13
+ 10a:	08 95       	ret
+
+0000010c <timer1_init>:
+
+
+ void timer1_init()
+ {
+	 // set up timer with Pre-scaler = 256 
+	 TCCR1B |= (1 << WGM12);
+ 10c:	8e b5       	in	r24, 0x2e	; 46
+ 10e:	88 60       	ori	r24, 0x08	; 8
+ 110:	8e bd       	out	0x2e, r24	; 46
+
+	 //Setup CTC Mode
+	 TCCR1B |= (1 << CS12);
+ 112:	8e b5       	in	r24, 0x2e	; 46
+ 114:	84 60       	ori	r24, 0x04	; 4
+ 116:	8e bd       	out	0x2e, r24	; 46
+
+	 //Enable interrupt
+	 TIMSK |= (1<<OCIE1B);
+ 118:	89 b7       	in	r24, 0x39	; 57
+ 11a:	88 60       	ori	r24, 0x08	; 8
+ 11c:	89 bf       	out	0x39, r24	; 57
+	 
+	 // initialize counter
+	 TCNT1 = 0;
+ 11e:	1d bc       	out	0x2d, r1	; 45
+ 120:	1c bc       	out	0x2c, r1	; 44
+	 
+	 // initialize compare value --> Required delay of 500ms at frequecy of F_CPU/256  // TODO : Replace number with equation
+	 OCR1A = 15624;
+ 122:	88 e0       	ldi	r24, 0x08	; 8
+ 124:	9d e3       	ldi	r25, 0x3D	; 61
+ 126:	9b bd       	out	0x2b, r25	; 43
+ 128:	8a bd       	out	0x2a, r24	; 42
+ 12a:	08 95       	ret
+
+0000012c <WatchDog_on>:
+
+
+  void WatchDog_on ()
+  {
+    //Enable watchdog timer
+    WDTCR |= (1<<WDE);
+ 12c:	81 b5       	in	r24, 0x21	; 33
+ 12e:	88 60       	ori	r24, 0x08	; 8
+ 130:	81 bd       	out	0x21, r24	; 33
+    
+    
+    //Set timeout period to be 2.1s
+    WDTCR |= (1<<WDP0) | (1<<WDP1) | (1<<WDP2);
+ 132:	81 b5       	in	r24, 0x21	; 33
+ 134:	87 60       	ori	r24, 0x07	; 7
+ 136:	81 bd       	out	0x21, r24	; 33
+ 138:	08 95       	ret
+
+0000013a <WatchDog_clear>:
+
+
+  void WatchDog_clear()
+  {
+    
+    MCUCSR &= ~(1<<WDRF);
+ 13a:	84 b7       	in	r24, 0x34	; 52
+ 13c:	87 7f       	andi	r24, 0xF7	; 247
+ 13e:	84 bf       	out	0x34, r24	; 52
+ 140:	08 95       	ret
+
+00000142 <_exit>:
+ 142:	f8 94       	cli
+
+00000144 <__stop_program>:
+ 144:	ff cf       	rjmp	.-2      	; 0x144 <__stop_program>

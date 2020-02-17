@@ -3,17 +3,32 @@
  *
  * Created: 11/2/2019 7:52:01 PM
  * Author : Ahmed
+ * Description :
+ * This is the Secpnd Transmitting slave MCU Code for Task4 in the Applied Programming Course at FHOO
+ *
+ * Purpose :
+ *  The implementation of this code includes reading sensor data through ADC then the transmission of this data through I2C/TWI communication protocol
+ *  to another device (Master)
+ *
+ *
+ * Input/Output :
+ *  Input : ADC data (ADCH)
+ *  Output : TWI Data
+ *
+ * MCU : ATmega32 , BOARD : myAVR Board MK2
+ *
+ *  Developed on Windows 10 using AtmelStudio 7
  */ 
 
-#define F_CPU (8000000) //Set clock frequency
-#include <avr/io.h>
-#include <util/delay.h>
+
 #include "ADC_lib.h"
 #include "timer_lib.h"
-#include <avr/interrupt.h>
 #include "i2c_lib.h"
+#include <avr/interrupt.h>
 #include <avr/wdt.h>
+#include <util/delay.h>
 
+//Variable to store ADC Values
 volatile uint8_t reading=0;
 
 ISR(ADC_vect){
@@ -85,14 +100,12 @@ int main(void)
   // initialize I2C slave Protocol //TODO
   i2c_slave_init(ui8_address);
 
-  //Initialize timer 1
-  timer1_init();
+  //Initialize timer 1 with 500ms interval
+  timer1_init(0.5);
 
-  // set pins PD5, PD6 as output for testing
-  //DDRD |= (1<<DDD5) | (1<<DDD6);
 
   //Start ADC conversion
-  ADCSRA |= (1<<ADSC);
+  ADC_start();
 
   //Enable watchdog timer
   WatchDog_on();

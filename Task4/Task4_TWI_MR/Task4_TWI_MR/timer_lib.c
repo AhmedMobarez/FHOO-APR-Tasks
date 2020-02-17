@@ -12,12 +12,12 @@
 
 
 
- void timer1_init()
+ void timer1_init(float delay)
  {
-	 // set up timer with Pre-scaler = 256 
+	 // Setup CTC Mode
 	 TCCR1B |= (1 << WGM12);
 
-	 //Setup CTC Mode
+	 //set up timer with Pre-scaler = 256 
 	 TCCR1B |= (1 << CS12);
 
 	 //Enable interrupt
@@ -26,8 +26,9 @@
 	 // initialize counter
 	 TCNT1 = 0;
 	 
-	 // initialize compare value --> Required delay of 500ms at frequecy of F_CPU/256  // TODO : Replace number with equation
-	 OCR1A = 15624;
+	 // initialize compare value --> Required delay of 500ms at frequecy of F_CPU/256
+	 //OCR1A = 15624;
+	 OCR1A = ((delay*F_CPU)/256)-1;
 
 
  }

@@ -1,44 +1,62 @@
 /*
- * Task2_TWI_Tx.c
- *
- * Created: 10/15/2019 3:04:44 PM
- * Author : Ahmed
- */ 
+* Task2_TWI_Tx.c
+*
+* Created: 10/15/2019 3:04:44 PM
+* Author : Ahmed
+*
+* Description :
+*   This is the Transmitting MCU Code for Task2 in the Applied Programming Course at FHOO
+*
+* Purpose :
+*  The implementation of this code includes reading sensor data through ADC then the transmission of this data through I2C/TWI communication protocol
+*  to another device
+*
+*
+* Input/Output :
+*  ADC data (ADCH) -- Output : TWI Data
+*
+* MCU : ATmega32 , BOARD : myAVR Board MK2
+*
+*  Developed on Windows 10 using AtmelStudio 7.0.2389
+*/
 
- #define F_CPU (8000000) //Set clock frequency
- #include <avr/io.h>
- #include <util/delay.h>
- #include "ADC_lib.h"
- #include "timer_lib.h"
- #include <avr/interrupt.h>
- #include "i2c_lib.h"
- #include <avr/wdt.h>
 
- volatile uint8_t reading=0;
 
- ISR(ADC_vect){
+#include "ADC_lib.h"
+#include "timer_lib.h"
+#include "i2c_lib.h"
+#include <avr/interrupt.h>
+#include <util/delay.h>
+#include <avr/wdt.h>
+
+//Variable to store ADC values
+volatile uint8_t reading=0;
+
+ ISR(ADC_vect)
+ {
    
   // Read ADC data
   reading = ADCH;
 
  }
 
- ISR(TWI_vect){
-   // Check status if the i2c bus and act accordingly
+ ISR(TWI_vect)
+ {
+   // Check status of the i2c bus and act accordingly ( All Actions are described by the data sheet)
    switch(TWSR & TW_STATUS_MASK){
      
      // Slave address acknowledged, data byte will be transmitted 
      case TW_ST_SLA_ACK :
-     PORTD ^= (1<<PD5);               //For testing
-     wdt_reset();
-     i2c_write(reading);
+     PORTD ^= (1<<PD5);               //pin toggling For testing
+     wdt_reset();                     // reset watchdog timer
+     i2c_write(reading);              // Send data through I2C
      break;
 
      // Data byte acknowledged, sending another data byte
      case TW_ST_DATA_ACK :
-     PORTD ^= (1<<PD6);               //For testing
-     wdt_reset();
-     i2c_write(reading);
+     PORTD ^= (1<<PD6);               //pin toggling For testing
+     wdt_reset();                     // reset watchdog timer
+     i2c_write(reading);              // Send data through I2C
      break;
 
      // Data byte received and NACK returned 
@@ -82,17 +100,17 @@ int main(void)
 	// Initialize ADC Module
 	ADC_init();
 
-	// initialize I2C slave Protocol //TODO
+	// initialize I2C slave Protocol 
 	i2c_slave_init(ui8_address);
 
-	//Initialize timer 1
-	timer1_init();
+	//Initialize timer 1 -- Pass required time interval in seconds
+	timer1_init(0.5);
 
 	// set pins PD5, PD6 as output for testing
 	DDRD |= (1<<DDD5) | (1<<DDD6);
 
 	//Start ADC conversion
-	ADCSRA |= (1<<ADSC);
+	ADC_start();
 
   //Enable watchdog timer
   WatchDog_on();

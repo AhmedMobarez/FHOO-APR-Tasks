@@ -8,12 +8,13 @@
 
 #ifndef TIMER_LIB_H_
 #define TIMER_LIB_H_
+#define F_CPU (8000000)
 
 #include <avr/io.h>
 
 
 
-void timer1_init();
+void timer1_init(float delay);
 void WatchDog_on();
 void WatchDog_clear();
 

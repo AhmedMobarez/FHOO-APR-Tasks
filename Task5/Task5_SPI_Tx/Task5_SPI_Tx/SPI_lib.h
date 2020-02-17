@@ -19,7 +19,7 @@
 
 
 void spi_slave_init();
-unsigned char spi_transmit(unsigned char data);
-char SPI_Receive();
+void spi_transmit(unsigned char data);
+unsigned char SPI_Receive();
 
 #endif /* SPI_LIB_H_ */

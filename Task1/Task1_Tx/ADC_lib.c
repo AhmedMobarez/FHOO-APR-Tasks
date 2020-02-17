@@ -7,11 +7,12 @@
 
  #include "ADC_lib.h"
 
- void ADC_init(){
+
+void ADC_init()
+{
 
  //Set reference voltage to be VCC
-
- ADMUX |=(1<<REFS0)|  (1<<MUX0) | (1<<ADLAR) ;
+ ADMUX |=(1<<REFS0) ;
 
  //Choose PA1 as our analog input pin (ADC1)
  ADMUX |=(1<<MUX0);
@@ -20,36 +21,30 @@
  ADMUX |=(1<<ADLAR) ;
 
 
-//Enable ADC
-
-ADCSRA |= (1<<ADEN);
-
-//Set Pre-scaler value to 128 ( frequency = F_CPU/128 = 62.5KHz )
-ADCSRA |=(1<<ADPS0)|(1<<ADPS1)|(1<<ADPS2);
-
-//Enable ADC Interrupt
-ADCSRA |= (1<<ADIE);
-
-//Enable ADC auto-triggering
-ADCSRA |= (1<<ADATE);
-
-//Auto Triggering mode
-SFIOR |= (1<<ADTS2) | (1<<ADTS0);
- 
+  //Enable ADC
+  ADCSRA |= (1<<ADEN);
+  
+  //Set Pre-scaler value to 128 ( frequency = F_CPU/128 = 62.5KHz )
+  ADCSRA |=(1<<ADPS0)|(1<<ADPS1)|(1<<ADPS2);
+  
+  //Enable ADC Interrupt
+  ADCSRA |= (1<<ADIE);
+  
+  //Enable ADC Auto-Triggering
+  ADCSRA |= (1<<ADATE);
+  
+  //Auto Triggering mode -- Trigger source : Timer/Counter1 Compare Match B
+  SFIOR |= (1<<ADTS2) | (1<<ADTS0);
+   
 
  }
 
 
- void ADC_read(){
+void ADC_start()
+{
 
  //Start conversion
-ADCSRA |= (1<<ADSC);
-
- //wait for the conversion to be completed
- //while(ADCSRA & (1<<ADSC));
-
- // Return received value
- //return ADCH;
+  ADCSRA |= (1<<ADSC);
 
 
  }

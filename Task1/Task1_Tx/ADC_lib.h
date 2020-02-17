@@ -10,7 +10,7 @@
 #define ADC_LIB_H_
 
 void ADC_init();
-void ADC_read();
+void ADC_start();
 
 
 

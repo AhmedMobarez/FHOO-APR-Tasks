@@ -29,13 +29,13 @@
 
 void timer0_cycle( uint8_t duty_cycle)
 {
-   
+   //Set PWM duty cycle
    OCR0 = duty_cycle;
 
 }
 
 void timer2_init(){
-  //Set wave generation mode to fast pwm
+  //Set wave generation mode to fast PWM
   TCCR2 |= (1<<WGM21) | (1<<WGM20);
 
   //Set compare match output to inverting mode
@@ -50,7 +50,8 @@ void timer2_init(){
 }
 
 void timer2_cycle(uint8_t duty){
-
+  
+  //Set PWM duty cycle
   OCR2 = duty;
 
 }

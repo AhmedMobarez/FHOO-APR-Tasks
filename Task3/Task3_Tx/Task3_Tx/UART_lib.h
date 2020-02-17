@@ -5,7 +5,7 @@
  *  Author: Ahmed
  */ 
  #include <avr/io.h>
- #define F_CPU 8000000
+ #define F_CPU 8000000 //Hz
 
 
 

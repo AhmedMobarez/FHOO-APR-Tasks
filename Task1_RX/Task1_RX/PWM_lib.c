@@ -8,7 +8,8 @@
  #include "PWM_lib.h"
 
 
- void timer0_init(){
+ void timer0_init()
+ {
   
   // Set wave generation mode to fast PWM
   TCCR0 |= (1<<WGM01) | (1<<WGM00);
@@ -27,8 +28,10 @@
   
 }
 
- void timer0_cycle( uint8_t duty_cycle){
+ void timer0_cycle(uint8_t duty_cycle)
+ {
   
+  // Set the Duty cycle
   OCR0 = duty_cycle;
 
  }
@@ -38,9 +41,7 @@
  {
   //Enable watchdog timer
   WDTCR |= (1<<WDE);
-  
-  //Enable interrupt
-  
+ 
   
   //Set timeout period to be 2.1s
   WDTCR |= (1<<WDP0) | (1<<WDP1) | (1<<WDP2);
@@ -51,6 +52,7 @@
  void WatchDog_clear()
  {
   
+  // Clear watchdog pin
   MCUCSR &= ~(1<<WDRF);
 
  }

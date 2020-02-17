@@ -19,15 +19,15 @@ void i2c_slave_init(uint8_t address){
  // No Prescaler
  TWSR &= ~((1<<TWPS0) | (1<<TWPS1));
 
-//Set slave address + R/W bit
-TWAR = address;
+  //Set slave address + R/W bit
+  TWAR = address;
 
- //Enable interrupt
- TWCR |= (1<<TWIE);
+  //Enable interrupt
+  TWCR |= (1<<TWIE);
 
-//slave initialization  sequence
-TWCR |= (1<<TWEN) | (1<<TWEA) | (1<<TWINT);
-TWCR &= ~((1<<TWSTA) | (1<<TWSTO));
+  //slave initialization  sequence
+  TWCR |= (1<<TWEN) | (1<<TWEA) | (1<<TWINT);
+  TWCR &= ~((1<<TWSTA) | (1<<TWSTO));
 
 }
 

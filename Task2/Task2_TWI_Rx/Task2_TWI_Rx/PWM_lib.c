@@ -8,7 +8,8 @@
  #include "PWM_lib.h"
 
 
- void timer0_init(){
+ void timer0_init()
+ {
   
   // Set wave generation mode to fast PWM
   TCCR0 |= (1<<WGM01) | (1<<WGM00);
@@ -23,12 +24,12 @@
   //Enable pin OCR0 as output
   DDRB |= (1<<DDB3);
   
-  
-  
 }
 
- void timer0_cycle( uint8_t duty_cycle){
+ void timer0_cycle( uint8_t duty_cycle)
+ {
   
+  //Set PWM Duty cycle
   OCR0 = duty_cycle;
 
  }

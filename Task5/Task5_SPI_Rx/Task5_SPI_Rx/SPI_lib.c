@@ -11,30 +11,52 @@
 
 
  void spi_master_init(){
+  //Make MOSI, SCK direction as output pins 
+  DDRB |= (1<<MOSI)|(1<<SCK)|(1<<SS);	
 
-  DDRB |= (1<<MOSI)|(1<<SCK)|(1<<SS);		/* Make MOSI, SCK, 0th pin direction as output pins */
-  DDRB &= ~(1<<MISO);						/* Make MISO pin as input pin */
-  PORTB |= (1<<SS);						/* Disable slave initially by making high on SS pin */
-  SPCR = (1<<SPE)|(1<<MSTR)|(1<<SPR0);	/* Enable SPI, Enable in master mode, with Fosc/16 SCK frequency */
+  //Make MISO pin as input pin
+  DDRB &= ~(1<<MISO);
 
+  //Disable slave initially by making high on SS pin
+  PORTB |= (1<<SS);
+
+  //Enable SPI, Enable in master mode, with F_CPU/16 SCK frequency
+  SPCR = (1<<SPE)|(1<<MSTR)|(1<<SPR0);
+
+  //Define Slave enable
+  SS_Enable;
  }
 
 
  unsigned char spi_receive(){
 
+ // Write data to SSPI data register  to start the communication
  SPDR = 0xFF;
- while(!(SPSR & (1<<SPIF)));				/* Wait till reception complete */
+
+ // Wait till reception complete
+ while(!(SPSR & (1<<SPIF)));				
+
+ //Return received value
  return(SPDR);
 
  }
 
 
 
-void SPI_Write(char data)					/* SPI write data function */
+void SPI_Write(char data)					
 {
+  // variable to flush SPI data register value
   char flush_buffer;
-  SPDR = data;							/* Write data to SPI data register */
-  while(!(SPSR & (1<<SPIF)));				/* Wait till transmission complete */
-  flush_buffer = SPDR;					/* Flush received data */
-  /* Note: SPIF flag is cleared by first reading SPSR (with SPIF set) and then accessing SPDR hence flush buffer used here to access SPDR after SPSR read */
+
+  // Send data through SPI data register 
+  SPDR = data;							
+
+  // Wait till transmission complete
+  while(!(SPSR & (1<<SPIF)));
+
+  //Flush received data
+  flush_buffer = SPDR;
+
+  // Note to self: SPIF flag is cleared by first reading SPSR (with SPIF set) and then accessing SPDR
+  // hence flush buffer used here to access SPDR after SPSR read 
 }

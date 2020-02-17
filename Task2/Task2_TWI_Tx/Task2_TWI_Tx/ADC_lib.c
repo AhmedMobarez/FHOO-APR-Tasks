@@ -7,7 +7,7 @@
 
  #include "ADC_lib.h"
 
- void ADC_init(){
+void ADC_init(){
 
  //Set reference voltage to be VCC
 
@@ -39,16 +39,10 @@
  }
 
 
- void ADC_read(){
+ void ADC_start(){
 
  //Start conversion
 ADCSRA |= (1<<ADSC);
-
- //wait for the conversion to be completed
- //while(ADCSRA & (1<<ADSC));
-
- // Return received value
- //return ADCH;
 
 
  }

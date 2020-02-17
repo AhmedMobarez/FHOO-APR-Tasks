@@ -4,8 +4,8 @@
  * Created: 10/18/2019 5:22:40 PM
  *  Author: Ahmed
  */
-#define F_CPU (8000000)
-#define SCL_FREQ  (100000)
+#define F_CPU (8000000) //Hz
+#define SCL_FREQ  (100000)  //Hz
 #include <avr/io.h>
 #include <util/twi.h>
 
